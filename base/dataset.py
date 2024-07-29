@@ -106,6 +106,7 @@ class Sanity_Check_Model(nn.Module):
         print("The shape of 3d_boundingboxes_transform_scene_object_matrix:", piece['3d_boundingboxes_transform_scene_object_matrix'].shape)
         print("The shape of 2d_boundingboxes_aabb:", piece['2d_boundingboxes_aabb'].shape)
         print("The shape of video:", piece['video'].shape)
+        print("The shape of eye_gaze:", piece['eye_gaze'].shape)
         print("---------------")
     
 if __name__ == "__main__":
