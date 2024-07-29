@@ -1,6 +1,7 @@
 # Dataset
 /dataset/
 /test.py
+/runs/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

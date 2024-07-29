@@ -41,7 +41,7 @@ class ADT_Dataset(Dataset):
         self.h5py_paths = []
         self.intervals = []
 
-
+        print("Loading data...")
         for sequence_name in tqdm(self.whole_data.keys()):
             cur_seq = self.whole_data[sequence_name]
             self.sequence_count += 1
