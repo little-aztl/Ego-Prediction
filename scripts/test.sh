@@ -1,0 +1,1 @@
+python test.py --model_path ./logs/simple_mlp.pth

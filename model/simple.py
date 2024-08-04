@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+from base.utils import yaw_pitch_depth_to_vector
 
 class Simple_Eye_Gaze_MLP(nn.Module):
     def __init__(self, input_dim, hidden_dim, output_dim):
@@ -22,17 +23,11 @@ class Simple_Eye_Gaze_MLP(nn.Module):
 class Simple_Eye_Gaze_Loss(nn.Module):
     def __init__(self):
         super(Simple_Eye_Gaze_Loss, self).__init__()
-
-    def yaw_pitch_depth_to_vector(self, yaw : torch.Tensor, pitch : torch.Tensor, depth : torch.Tensor):
-        vector = torch.stack((torch.tan(yaw), torch.tan(pitch), torch.ones_like(yaw)), dim=2)
-        vector = vector / torch.linalg.norm(vector, dim=2)[:, :, None]
-        vector = vector * depth[:, :, None]
-        return vector
         
     def forward(self, y_pred, y_true):
         # print("y_pred.shape: ", y_pred.shape)
-        angle_pred = self.yaw_pitch_depth_to_vector(y_pred[:, :, 0], y_pred[:, :, 1], y_pred[:, :, 2])
-        angle_true = self.yaw_pitch_depth_to_vector(y_true[:, :, 0], y_true[:, :, 1], y_true[:, :, 2])
+        angle_pred = yaw_pitch_depth_to_vector(y_pred[:, :, 0], y_pred[:, :, 1], y_pred[:, :, 2])
+        angle_true = yaw_pitch_depth_to_vector(y_true[:, :, 0], y_true[:, :, 1], y_true[:, :, 2])
         return torch.mean(torch.sum((angle_pred - angle_true) ** 2, dim=2))
         
 

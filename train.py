@@ -30,7 +30,13 @@ def train():
         device = torch.device('cpu')
     print(f"Using device: {device}")
 
-    adt_dataset = ADT_Dataset(len_per_input_seq=len_per_input_seq, len_per_output_seq=len_per_output_seq, interval=interval, stride=frame_stride)
+    adt_dataset = ADT_Dataset(
+        len_per_input_seq=len_per_input_seq, 
+        len_per_output_seq=len_per_output_seq, 
+        interval=interval, 
+        stride=frame_stride,
+        train=True
+    )
     dataloader = torch.utils.data.DataLoader(adt_dataset, batch_size=batch_size, shuffle=True, num_workers=num_workers)
 
     if model_name == "simple_mlp":
@@ -71,7 +77,7 @@ def train():
                 running_loss = 0.0
 
         
-    print("Finish Training")
+    print("Finish Training.")
     writer.close()
 
     torch.save({"model": model.state_dict()}, './logs/' + model_name + '.pth')
