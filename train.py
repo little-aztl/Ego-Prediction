@@ -3,8 +3,30 @@ from base.dataset import ADT_Dataset
 from model.simple import Simple_Eye_Gaze_MLP, Simple_Eye_Gaze_Loss
 from model.simple_transformer import Simple_Transformer_Eye_Gaze
 from base.utils import load_config
+from base.metrics import Average_Angular_Error
 from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
+
+def validate(epoch, model, data_loader, criterion, writer, device):
+    model.eval()
+    epoch_loss = 0
+    epoch_angular_error = 0
+    with torch.no_grad():
+        for idx, (input_clip, gt_clip) in tqdm(enumerate(data_loader), total=len(data_loader)):
+            input_eye_gaze = input_clip['eye_gaze'].to(device)
+            gt_eye_gaze = gt_clip['eye_gaze'].to(device)
+
+            pred_eye_gaze = model(input_eye_gaze)
+            loss = criterion(pred_eye_gaze, gt_eye_gaze)
+            angular_error = Average_Angular_Error(pred_eye_gaze, gt_eye_gaze)
+
+            epoch_loss += loss.item()
+            epoch_angular_error += angular_error
+
+    
+    writer.add_scalar('validation loss', epoch_loss / len(data_loader), epoch)
+    writer.add_scalar('validation angular error', epoch_angular_error / len(data_loader), epoch)
+            
 
 def train():
     config = load_config("./configs/config.yaml")
@@ -76,6 +98,7 @@ def train():
                 writer.add_scalar('training loss', running_loss / 50, epoch * len(dataloader) + idx)
                 running_loss = 0.0
 
+        validate(epoch + 1, model, dataloader, criterion, writer, device)
         
     print("Finish Training.")
     writer.close()

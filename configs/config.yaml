@@ -9,10 +9,10 @@ frame_stride: 5
 
 batch_size: 128
 learning_rate: 0.0005
-epochs: 1
+epochs: 5
 model: "simple_mlp"
 use_gpu: true
-num_workers: 36
+num_workers: 32
 optimizer: "AdamW"
 weight_decay: 0.01
 

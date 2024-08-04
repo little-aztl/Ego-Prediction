@@ -19,6 +19,7 @@ def test():
     frame_stride = config['frame_stride']
     hidden_dim = config['hidden_dim']
     use_gpu = config['use_gpu']
+    num_workers = config['num_workers']
 
     if use_gpu:
         assert torch.cuda.is_available()
@@ -41,7 +42,8 @@ def test():
         stride=frame_stride,
         train=False
     )
-    dataloader = torch.utils.data.DataLoader(dataset, batch_size=1, shuffle=False, num_workers=36)
+    torch.multiprocessing.set_sharing_strategy('file_system')
+    dataloader = torch.utils.data.DataLoader(dataset, batch_size=1, shuffle=False, num_workers=num_workers)
 
     model.eval()
     sum_angular_error = 0
