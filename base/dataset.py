@@ -22,10 +22,11 @@ class ADT_Dataset(Dataset):
     def __init__(
         self, 
         h5py_path="dataset/data.h5py", 
-        len_per_input_seq=100, 
+        len_per_input_seq=100,
         len_per_output_seq=30,
         interval=50, 
         stride=5,
+        train=True,
         ):
         
         self.whole_data = h5py.File(h5py_path, "r")
@@ -43,6 +44,10 @@ class ADT_Dataset(Dataset):
 
         print("Loading data...")
         for sequence_name in tqdm(self.whole_data.keys()):
+            if train and not self.whole_data[sequence_name].attrs['train']:
+                continue
+            if not train and self.whole_data[sequence_name].attrs['train']:
+                continue
             cur_seq = self.whole_data[sequence_name]
             self.sequence_count += 1
             for device_idx in cur_seq.keys():

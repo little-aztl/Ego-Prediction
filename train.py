@@ -1,6 +1,7 @@
 import torch
 from base.dataset import ADT_Dataset
 from model.simple import Simple_Eye_Gaze_MLP, Simple_Eye_Gaze_Loss
+from model.simple_transformer import Simple_Transformer_Eye_Gaze
 from base.utils import load_config
 from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
@@ -10,6 +11,7 @@ def train():
     batch_size = config['batch_size']
     epochs = config['epochs']
     use_gpu = config['use_gpu']
+    model_name = config['model']
     num_workers = config['num_workers']
     lr = config['learning_rate']
     weight_decay = config['weight_decay']
@@ -26,11 +28,18 @@ def train():
         device = torch.device('cuda')
     else:
         device = torch.device('cpu')
+    print(f"Using device: {device}")
 
     adt_dataset = ADT_Dataset(len_per_input_seq=len_per_input_seq, len_per_output_seq=len_per_output_seq, interval=interval, stride=frame_stride)
     dataloader = torch.utils.data.DataLoader(adt_dataset, batch_size=batch_size, shuffle=True, num_workers=num_workers)
 
-    model = Simple_Eye_Gaze_MLP(input_dim=3 * len_per_input_seq // frame_stride, hidden_dim=hidden_dim, output_dim=3 * len_per_output_seq // frame_stride).to(device)
+    if model_name == "simple_mlp":
+        model = Simple_Eye_Gaze_MLP(input_dim=3 * len_per_input_seq // frame_stride, hidden_dim=hidden_dim, output_dim=3 * len_per_output_seq // frame_stride).to(device)
+    elif model_name == "simple_transformer":
+        model = Simple_Transformer_Eye_Gaze().to(device)
+    else:
+        raise NotImplementedError
+
     criterion = Simple_Eye_Gaze_Loss()
 
     if config['optimizer'] == 'AdamW':
@@ -64,6 +73,9 @@ def train():
         
     print("Finish Training")
     writer.close()
+
+    torch.save({"model": model.state_dict()}, './logs/' + model_name + '.pth')
+    print("Model saved.")
 
 if __name__ == "__main__":
     train()
