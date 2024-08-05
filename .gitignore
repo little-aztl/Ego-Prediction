@@ -3,6 +3,7 @@
 /try.py
 /runs/
 /logs/
+/visualization/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
