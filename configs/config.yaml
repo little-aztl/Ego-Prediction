@@ -10,7 +10,8 @@ frame_stride: 5
 batch_size: 128
 learning_rate: 0.0005
 epochs: 5
-model: "simple_mlp"
+# model name: simple_gaze_mlp, simple_traj_mlp
+model: "simple_gaze_mlp"
 use_gpu: true
 num_workers: 32
 optimizer: "AdamW"

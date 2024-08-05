@@ -92,6 +92,8 @@ class ADT_Dataset(Dataset):
         res_output['2d_boundingboxes_aabb'] = torch.from_numpy(cur_piece['2d_boundingboxes_aabb'][l + self.len_per_input_seq : r + 1 : stride])
         res_input['eye_gaze'] = torch.from_numpy(cur_piece['eye_gaze'][l : l + self.len_per_input_seq : stride])
         res_output['eye_gaze'] = torch.from_numpy(cur_piece['eye_gaze'][l + self.len_per_input_seq : r + 1 : stride])
+        res_input['cam_pose_quat'] = torch.from_numpy(cur_piece['cam_pose_quat'][l : l + self.len_per_input_seq : stride])
+        res_output['cam_pose_quat'] = torch.from_numpy(cur_piece['cam_pose_quat'][l + self.len_per_input_seq : r + 1 : stride])
         return res_input, res_output
 
     def get_video(self, img_paths):
@@ -112,6 +114,7 @@ class Sanity_Check_Model(nn.Module):
         print("The shape of 2d_boundingboxes_aabb:", piece['2d_boundingboxes_aabb'].shape)
         print("The shape of video:", piece['video'].shape)
         print("The shape of eye_gaze:", piece['eye_gaze'].shape)
+        print("The shape of cam_pose_quat:", piece['cam_pose_quat'].shape)
         print("---------------")
     
 if __name__ == "__main__":

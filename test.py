@@ -4,7 +4,7 @@ from model.simple import Simple_Eye_Gaze_MLP, Simple_Eye_Gaze_Loss
 from base.utils import load_config
 from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
-from base.metrics import Average_Angular_Error
+from base.metrics import Average_Gaze_Angular_Error
 
 def test():
     parser = argparse.ArgumentParser()
@@ -54,7 +54,7 @@ def test():
 
             pred_eye_gaze = model(input_eye_gaze)
 
-            angular_error = Average_Angular_Error(pred_eye_gaze, gt_eye_gaze)
+            angular_error = Average_Gaze_Angular_Error(pred_eye_gaze, gt_eye_gaze)
             tqdm.write("Angular Error: {:.2f}°".format(angular_error))
             sum_angular_error += angular_error
 
