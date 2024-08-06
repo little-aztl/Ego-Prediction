@@ -41,13 +41,13 @@ class Simple_Trajectory_MLP(nn.Module):
         self.fc2 = nn.Linear(hidden_dim, output_dim)
     def forward(self, input_clip, device):
         eye_gaze = input_clip['eye_gaze'].to(device)
-        cam_scene_matrix = input_clip['cam_scene_matrix'].to(device)
+        scene_cam_matrix = input_clip['scene_cam_matrix'].to(device)
         '''
         eye_gaze: (batch_size, len_per_input_seq, 3)
         scene_cam_matrix: (batch_size, len_per_input_seq, 4, 4)
         '''
-        cam_scene_matrix = cam_scene_matrix.reshape(cam_scene_matrix.shape[0], cam_scene_matrix.shape[1], -1)
-        x = torch.cat((eye_gaze, cam_scene_matrix), dim=2)
+        scene_cam_matrix = scene_cam_matrix.reshape(scene_cam_matrix.shape[0], scene_cam_matrix.shape[1], -1)
+        x = torch.cat((eye_gaze, scene_cam_matrix), dim=2)
         # x: (batch_size, len_per_input_seq, 3 + 16)
 
         # unfold along the time dimension
@@ -72,7 +72,7 @@ class Simple_Trajectory_Loss(nn.Module):
         coord_pred = y_pred[0]
         quat_pred = y_pred[1]
         
-        coord_true = (-gt_clip['cam_scene_matrix'][:, :, :3, 3]).to(device)
+        coord_true = gt_clip['scene_cam_matrix'][:, :, :3, 3].to(device)
         quat_true = gt_clip['cam_pose_quat'].to(device)
         
         coord_loss = torch.mean(torch.sum((coord_pred - coord_true) ** 2, dim=2))

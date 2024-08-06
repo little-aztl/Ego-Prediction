@@ -23,7 +23,8 @@ class Average_Traj_Error(nn.Module):
         pred_coord = pred_traj[0]
         pred_quat = pred_traj[1]
 
-        gt_coord = (-gt_clip['cam_scene_matrix'][:, :, :3, 3]).to(device)
+        
+        gt_coord = gt_clip['scene_cam_matrix'][:, :, :3, 3].to(device)
         gt_quat = gt_clip['cam_pose_quat'].to(device)
 
         coord_error = torch.mean(torch.norm(pred_coord - gt_coord, dim=2))

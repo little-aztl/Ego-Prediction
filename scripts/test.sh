@@ -1,1 +1,1 @@
-python test.py --model_path ./logs/simple_mlp.pth
+python test.py --model_path ./logs/simple_traj_mlp.pth

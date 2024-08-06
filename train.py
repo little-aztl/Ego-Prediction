@@ -87,7 +87,7 @@ def train():
     torch.save({"model": model.state_dict()}, './logs/' + model_name + '.pth')
     print("Model saved.")
 
-def validate(dataloader, model, model_name, criterion, validation_criterion, writer, epoch, device):
+def validate(dataloader, model, model_name, criterion, validation_criterion, writer, epoch, device, log_tensorboard=True):
     model.eval()
     epoch_loss = 0
     if model_name == "simple_gaze_mlp":
@@ -110,13 +110,21 @@ def validate(dataloader, model, model_name, criterion, validation_criterion, wri
                 epoch_coord_error += validation[0].item()
                 epoch_angular_error += validation[1].item()
 
-        
-    writer.add_scalar('validation loss', epoch_loss / len(dataloader), epoch)
+    if log_tensorboard:
+        writer.add_scalar('validation loss', epoch_loss / len(dataloader), epoch)
+        if model_name == "simple_gaze_mlp":
+            writer.add_scalar('validation angular error', epoch_angular_error / len(dataloader), epoch)
+        elif model_name == "simple_traj_mlp":
+            writer.add_scalar('validation coord error', epoch_coord_error / len(dataloader), epoch)
+            writer.add_scalar('validation angular error', epoch_angular_error / len(dataloader), epoch)
+
+    print("Validation Loss: {:.4f}.".format(epoch_loss / len(dataloader)))
     if model_name == "simple_gaze_mlp":
-        writer.add_scalar('validation angular error', epoch_angular_error / len(dataloader), epoch)
+        print("Validation Angular Error: {:.4f}°.".format(epoch_angular_error / len(dataloader)))
     elif model_name == "simple_traj_mlp":
-        writer.add_scalar('validation coord error', epoch_coord_error / len(dataloader), epoch)
-        writer.add_scalar('validation angular error', epoch_angular_error / len(dataloader), epoch)
+        print("Validation Coord Error: {:.4f}.".format(epoch_coord_error / len(dataloader)))
+        print("Validation Angular Error: {:.4f}°.".format(epoch_angular_error / len(dataloader)))
+    return
 
 if __name__ == "__main__":
     train()

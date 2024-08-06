@@ -1,10 +1,10 @@
 import torch, argparse
 from base.dataset import ADT_Dataset
-from model.simple import Simple_Eye_Gaze_MLP, Simple_Eye_Gaze_Loss
+from model.simple import Simple_Eye_Gaze_MLP, Simple_Eye_Gaze_Loss, Simple_Trajectory_Loss, Simple_Trajectory_MLP
 from base.utils import load_config
-from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
-from base.metrics import Average_Gaze_Angular_Error
+from train import validate
+from base.metrics import Average_Gaze_Angular_Error, Average_Traj_Error
 
 def test():
     parser = argparse.ArgumentParser()
@@ -28,11 +28,17 @@ def test():
         device = torch.device('cpu')
     print("Using device: ", device)
 
-    if model_name == "simple_mlp":
+    if model_name == "simple_gaze_mlp":
         model = Simple_Eye_Gaze_MLP(input_dim=3 * len_per_input_seq // frame_stride, hidden_dim=hidden_dim, output_dim=3 * len_per_output_seq // frame_stride).to(device)
+        criterion = Simple_Eye_Gaze_Loss()
+        validation_criterion = Average_Gaze_Angular_Error()
+    elif model_name == "simple_traj_mlp":
+        model = Simple_Trajectory_MLP(input_dim=3 * len_per_input_seq // frame_stride + 16 * len_per_input_seq // frame_stride, hidden_dim=hidden_dim, output_dim=3 * len_per_output_seq // frame_stride + 4 * len_per_output_seq // frame_stride).to(device)   
+        criterion = Simple_Trajectory_Loss() 
+        validation_criterion = Average_Traj_Error()
     else:
         raise NotImplementedError
-    
+
     model.load_state_dict(torch.load(args.model_path)['model'])
 
     dataset = ADT_Dataset(
@@ -45,20 +51,7 @@ def test():
     torch.multiprocessing.set_sharing_strategy('file_system')
     dataloader = torch.utils.data.DataLoader(dataset, batch_size=1, shuffle=False, num_workers=num_workers)
 
-    model.eval()
-    sum_angular_error = 0
-    with torch.no_grad():
-        for idx, (input_clip, gt_clip) in tqdm(enumerate(dataloader), total=len(dataloader)):
-            input_eye_gaze = input_clip['eye_gaze'].to(device)
-            gt_eye_gaze = gt_clip['eye_gaze'].to(device)
-
-            pred_eye_gaze = model(input_eye_gaze)
-
-            angular_error = Average_Gaze_Angular_Error(pred_eye_gaze, gt_eye_gaze)
-            tqdm.write("Angular Error: {:.2f}°".format(angular_error))
-            sum_angular_error += angular_error
-
-    print("The average angular error is {:.2f}°.".format(sum_angular_error / len(dataloader)))
+    validate(dataloader, model, model_name, criterion, validation_criterion, None, 0, device, log_tensorboard=False)
     
 if __name__ == '__main__':
     test()

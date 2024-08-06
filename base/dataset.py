@@ -27,12 +27,14 @@ class ADT_Dataset(Dataset):
         interval=50, 
         stride=5,
         train=True,
+        dataset_path="dataset/"
         ):
         
         self.whole_data = h5py.File(h5py_path, "r")
         self.len_per_input_seq = len_per_input_seq
         self.len_per_output_seq = len_per_output_seq
         self.interval = interval
+        self.dataset_path = dataset_path
 
         self.sequence_count = 0
         self.piece_count = 0
@@ -84,6 +86,8 @@ class ADT_Dataset(Dataset):
         res_output['video'] = self.get_video(cur_piece['img_path'][l + self.len_per_input_seq : r + 1 : stride])
         res_input['cam_scene_matrix'] = torch.from_numpy(cur_piece['cam_scene_matrix'][l : l + self.len_per_input_seq : stride])
         res_output['cam_scene_matrix'] = torch.from_numpy(cur_piece['cam_scene_matrix'][l + self.len_per_input_seq : r + 1 : stride])
+        res_input['scene_cam_matrix'] = torch.from_numpy(cur_piece['scene_cam_matrix'][l : l + self.len_per_input_seq : stride])
+        res_output['scene_cam_matrix'] = torch.from_numpy(cur_piece['scene_cam_matrix'][l + self.len_per_input_seq : r + 1 : stride])
         res_input['3d_boundingboxes_aabb'] = torch.from_numpy(cur_piece['3d_boundingboxes_aabb'][l : l + self.len_per_input_seq : stride])
         res_output['3d_boundingboxes_aabb'] = torch.from_numpy(cur_piece['3d_boundingboxes_aabb'][l + self.len_per_input_seq : r + 1 : stride])
         res_input['3d_boundingboxes_transform_scene_object_matrix'] = torch.from_numpy(cur_piece['3d_boundingboxes_transform_scene_object_matrix'][l : l + self.len_per_input_seq : stride])
@@ -99,7 +103,7 @@ class ADT_Dataset(Dataset):
     def get_video(self, img_paths):
         frames = []
         for img_path in img_paths:
-            frame = plt.imread("dataset/" + img_path.decode('utf-8'))
+            frame = plt.imread(self.dataset_path + img_path.decode('utf-8'))
             frames.append(frame)
         return torch.from_numpy(np.stack(frames))
 
